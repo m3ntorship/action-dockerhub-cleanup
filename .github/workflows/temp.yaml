@@ -13,9 +13,8 @@ jobs:
       - name: Hello world action step
         uses: ./ # Uses an action in the root directory
         id: delete_old_tags
-        env:
-          DOCKER_HUB_M3NTORSHIP_TOKEN: ${{secrets.DOCKER_HUB_M3NTORSHIP_TOKEN}}
         with:
+          token: ${{secrets.DOCKER_HUB_M3NTORSHIP_TOKEN}}
           keep-last: 50
           user: "m3ntorship"
           repos: '["m3ntorshipcom-storybook"]'

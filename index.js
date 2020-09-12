@@ -4,7 +4,7 @@ const axios = require("axios");
 const dockerhubAPI = axios.create({
   baseURL: "https://hub.docker.com/v2",
   headers: {
-    Authorization: `JWT ${process.env.DOCKER_HUB_M3NTORSHIP_TOKEN}`,
+    Authorization: `JWT ${core.getInput('token')}`,
   },
 });
 

@@ -4,6 +4,9 @@ branding:
   icon: 'anchor'  
   color: 'blue'
 inputs:
+  token:
+    description: "dockerhub token see how to create one here https://bit.ly/2FuzP2S"
+    required: true
   keep-last: # id of input
     description: "how many tags to keep"
     required: true

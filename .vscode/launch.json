@@ -10,12 +10,12 @@
       "name": "Launch Program",
       "skipFiles": ["<node_internals>/**"],
       "program": "${file}",
-      "console": "integratedTerminal",
       "env": {
         "INPUT_USER": "m3ntorship",
         "INPUT_REPOS": "[\"m3ntorshipcom-storybook\"]",
-        "INPUT_KEEP-LAST": "74",
-        "INPUT_SUBSTRINGS": "[\"pr\"]"
+        "INPUT_KEEP-LAST": "48",
+        // "INPUT_SUBSTRINGS": "[\"pr\"]",
+        "INPUT_TOKEN": "${env:DOCKER_HUB_M3NTORSHIP_TOKEN}"
       }
     }
   ]
