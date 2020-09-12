@@ -1,0 +1,28 @@
+name: "Delete old docker image tags"
+description: "Delete old docker image tags filtered by substrings and number of tags to keep"
+branding:
+  icon: 'anchor'  
+  color: 'blue'
+inputs:
+  keep-last: # id of input
+    description: "how many tags to keep"
+    required: true
+  user:
+    description: "dockerhub user"
+    required: true
+  repos:
+    description: "dockerhub repository to delete the tags from"
+    required: true
+  substrings:
+    description: "set of substrings to match against filterd tags if one of the substrings exists in the tag it will be deleted"
+    required: false
+  force-full-cleanup:
+    description: "A boolean to determine whether to delete all images or not"
+    required: false
+    default: false
+outputs:
+  success: # id of output
+    description: "status of the deletion"
+runs:
+  using: "node12"
+  main: "index.js"

@@ -1,0 +1,21 @@
+name: sanity-check
+on: 
+  push:
+    branches: 
+      - master
+jobs:
+  start:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: yarn
+      - name: Hello world action step
+        uses: ./ # Uses an action in the root directory
+        id: delete_old_tags
+        env:
+          DOCKER_HUB_M3NTORSHIP_TOKEN: ${{secrets.DOCKER_HUB_M3NTORSHIP_TOKEN}}
+        with:
+          keep-last: 50
+          user: "m3ntorship"
+          repos: '["m3ntorshipcom-storybook"]'
