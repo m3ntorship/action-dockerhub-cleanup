@@ -28,4 +28,4 @@ outputs:
     description: "status of the deletion"
 runs:
   using: "node12"
-  main: "index.js"
+  main: "dist/index.js"

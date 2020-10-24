@@ -3,8 +3,14 @@
   "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "package": "ncc build"
+  },
   "dependencies": {
-    "@actions/core": "^1.2.5",
+    "@actions/core": "^1.2.6",
     "axios": "^0.20.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.24.1"
   }
 }
