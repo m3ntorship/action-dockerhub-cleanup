@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v2
       - run: yarn
       - name: Hello world action step
-        uses: ./ # Uses an action in the root directory
+        uses: . # Uses an action in the root directory
         id: delete_old_tags
         with:
           token: ${{secrets.DOCKER_HUB_M3NTORSHIP_TOKEN}}
