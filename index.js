@@ -4,21 +4,31 @@ const axios = require("axios");
 const dockerhubAPI = axios.create({
   baseURL: "https://hub.docker.com/v2",
   headers: {
-    Authorization: `JWT ${core.getInput('token')}`,
+    Authorization: `JWT ${core.getInput("token")}`,
   },
 });
 
-const getAllCurrentTags = (user, repo) => {
-  return dockerhubAPI({
-    url: `/repositories/${user}/${repo}/tags/`,
-    params: {
-      page_size: 5000,
-    },
+const byLastPushedDate = (a, b) =>
+  new Date(b.last_updated) - new Date(a.last_updated);
+
+const getAllCurrentTags = async (user, repo, currentTags, nextPage) => {
+  tags = currentTags || [];
+  const url = nextPage || `/repositories/${user}/${repo}/tags`;
+
+  const { data } = await dockerhubAPI({
+    url,
   });
+
+  tags = [...tags, ...data.results];
+
+  if (data.next) {
+    return getAllCurrentTags(user, repo, tags, data.next);
+  }
+
+  return tags.sort(byLastPushedDate);
 };
 
 const shouldDeleteTag = (index, numbersToKeep, tag, substrings) => {
-  
   if (index < numbersToKeep) {
     return false;
   }
