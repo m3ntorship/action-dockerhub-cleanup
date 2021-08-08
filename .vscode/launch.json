@@ -10,12 +10,15 @@
       "name": "Launch Program",
       "skipFiles": ["<node_internals>/**"],
       "program": "${file}",
+      "console": "integratedTerminal",
       "env": {
-        "INPUT_USER": "m3ntorship",
-        "INPUT_REPOS": "[\"m3ntorshipcom-storybook\"]",
-        "INPUT_KEEP-LAST": "48",
-        // "INPUT_SUBSTRINGS": "[\"pr\"]",
-        "INPUT_TOKEN": "${env:DOCKER_HUB_M3NTORSHIP_TOKEN}"
+        "INPUT_USER": "m3ntorshipci",
+        "INPUT_REPOS": "[\"pickly-frontend\"]",
+        // "INPUT_SUBSTRINGS": "[\"dev-\"]",
+        // "INPUT_TOKEN": "${env:DOCKER_HUB_M3NTORSHIPCI_TOKEN}",
+        "INPUT_USERNAME": "${env:DOCKER_HUB_M3NTORSHIP_USERNAME}",
+        "INPUT_PASSWORD": "${env:DOCKER_HUB_M3NTORSHIP_PASSWORD}",
+        "INPUT_KEEP-LAST": "4",
       }
     }
   ]

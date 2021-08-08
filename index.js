@@ -1,21 +1,73 @@
 const core = require("@actions/core");
 const axios = require("axios");
+const DOCKERHUB_BASE_URL = "https://hub.docker.com/v2";
+
+// inputs
+const dockerhubUser = core.getInput("user");
+const dockerhubReposStr = core.getInput("repos");
+const dockerhubRepos = JSON.parse(dockerhubReposStr);
+const substringsStr = core.getInput("substrings");
+const substrings = substringsStr ? JSON.parse(substringsStr) : false;
+const numberOfTagsToKeep = parseInt(core.getInput("keep-last"));
+const forceFullCleanup = core.getInput("force-full-cleanup");
+
+const token = core.getInput("token");
+const username = core.getInput("username");
+const password = core.getInput("password");
+
+// logs
+core.startGroup("Inputs");
+core.info(`keep-last ${numberOfTagsToKeep}`);
+core.info(`user ${dockerhubUser}`);
+core.info(`repos ${dockerhubRepos}`);
+core.info(`substrings ${substrings}`);
+core.endGroup();
+
+const getAPIToken = async (dockerHubUser, dockerHubPasswordOrPersonalToken) => {
+  try {
+    const {
+      data: { token },
+    } = await axios({
+      method: "post",
+      url: `${DOCKERHUB_BASE_URL}/users/login`,
+      data: {
+        username: dockerHubUser,
+        password: dockerHubPasswordOrPersonalToken,
+      },
+    });
+
+    return token;
+  } catch (error) {
+    core.setFailed(error);
+  }
+};
 
 const dockerhubAPI = axios.create({
-  baseURL: "https://hub.docker.com/v2",
-  headers: {
-    Authorization: `JWT ${core.getInput("token")}`,
-  },
+  baseURL: DOCKERHUB_BASE_URL,
 });
+
+dockerhubAPI.interceptors.request.use(
+  async (config) => {
+    if (username && password) {
+      const token = await getAPIToken(username, password);
+      config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  () => Promise.reject(error)
+);
 
 const byLastPushedDate = (a, b) =>
   new Date(b.last_updated) - new Date(a.last_updated);
 
 const getAllCurrentTags = async (user, repo, currentTags, nextPage) => {
   tags = currentTags || [];
-  const url = nextPage || `/repositories/${user}/${repo}/tags`;
+  const url = nextPage || `/repositories/${user}/${repo}/tags?page_size=100`;
 
-  const { data } = await dockerhubAPI({
+  const {data} = await dockerhubAPI({
     url,
   });
 
@@ -52,10 +104,15 @@ const deleteSingleTag = (user, repo, tag) => {
   return dockerhubAPI({
     method: "DELETE",
     url: `/repositories/${user}/${repo}/tags/${tag}/`,
-  }).then((response) => {
-    core.info(`✅ successfully deleted ${tag} from ${user}/${repo}`);
-    return response;
-  });
+  })
+    .then((response) => {
+      core.info(`✅ successfully deleted ${tag} from ${user}/${repo}`);
+      return response;
+    })
+    .catch((error) => {
+      core.error(error);
+      return Promise.reject(error);
+    });
 };
 
 const getOldTags = (numbersToKeep, tags, substrings) => {
@@ -73,9 +130,7 @@ const cleanUpSingleRepo = async (
   substrings
 ) => {
   // get all current tags
-  const {
-    data: { results },
-  } = await getAllCurrentTags(dockerhubUser, dockerhubRepo);
+  const results = await getAllCurrentTags(dockerhubUser, dockerhubRepo);
 
   // get old tags
   const oldTags = getOldTags(numberOfTagsToKeep, results, substrings);
@@ -93,10 +148,6 @@ const cleanUpSingleRepo = async (
 
 const run = async () => {
   try {
-    // inputs
-    let numberOfTagsToKeep = parseInt(core.getInput("keep-last"));
-    const forceFullCleanup = core.getInput("force-full-cleanup");
-
     if (isNaN(numberOfTagsToKeep)) {
       throw 'Please be sure to set input "keep-last" as a number';
     }
@@ -104,19 +155,6 @@ const run = async () => {
     if (numberOfTagsToKeep < 1 && !forceFullCleanup) {
       throw 'To delete all Images please set input "force-full-cleanup" equals to true';
     }
-
-    const dockerhubUser = core.getInput("user");
-    const dockerhubReposStr = core.getInput("repos");
-    const dockerhubRepos = JSON.parse(dockerhubReposStr);
-    const substringsStr = core.getInput("substrings");
-    const substrings = substringsStr ? JSON.parse(substringsStr) : false;
-
-    core.startGroup("Inputs");
-    core.info(`keep-last ${numberOfTagsToKeep}`);
-    core.info(`user ${dockerhubUser}`);
-    core.info(`repos ${dockerhubRepos}`);
-    core.info(`substrings ${substrings}`);
-    core.endGroup();
 
     const reposCleanupPromises = dockerhubRepos.map((repo) => {
       return cleanUpSingleRepo(

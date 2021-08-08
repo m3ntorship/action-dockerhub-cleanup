@@ -1,0 +1,13 @@
+
+# REFERENCE: https://docs.docker.com/docker-hub/api/latest/
+@token = ''
+
+POST https://hub.docker.com/v2/users/login/
+Content-Type: application/json
+
+{"username":"<<USERNAME_HERE>>","password":"<<PASSWORD_HERE>>"}
+
+###
+GET  https://hub.docker.com/v2/repositories/m3ntorshipci/pickly-frontend/tags
+Authorization: JWT {{token}}
+ 
